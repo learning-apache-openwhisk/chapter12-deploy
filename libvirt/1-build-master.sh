@@ -25,3 +25,4 @@ qemu-img resize master.img 20G
 virsh net-update default add ip-dhcp-host \
 "<host mac='52:54:00:92:68:10' name='master' \
 ip='192.168.122.10' />" --live --config
+cd -
