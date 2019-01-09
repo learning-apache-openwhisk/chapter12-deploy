@@ -146,10 +146,10 @@ write_files:
         initContainers:
         - name: nginx-prepare
           image: busybox
-          command: ["sh", "-c", "echo '<h1>Welcome!</h1>' >/usr/share/nginx/html/index.html"]
+          command: ["sh", "-c", "echo '<h1>Welcome!</h1>' >/usr/share/nginx/html/welcome/index.html"]
           volumeMounts:
           - name: pv
-            mountPath: "/usr/share/nginx/html"
+            mountPath: "/usr/share/nginx/html/welcome"
         containers:
         - image: nginx
           name: nginx
@@ -157,7 +157,7 @@ write_files:
           - containerPort: 80
           volumeMounts:
           - name: pv
-            mountPath: "/usr/share/nginx/html"
+            mountPath: "/usr/share/nginx/html/welcome"
         volumes:
         - name: pv
           persistentVolumeClaim:
@@ -185,7 +185,7 @@ write_files:
         rules:
         - http:
             paths:
-            - path: / 
+            - path: /welcome
               backend:
                 serviceName: nginx-svc
                 servicePort: 80
@@ -201,10 +201,10 @@ write_files:
       if test "$(whoami)" != root
       then echo "Please, run me as 'sudo $0 $@'" ; exit 1
       fi
-      echo "*** Installing Rook ***"
       cd /etc/kubernetes
       if ! test -e rook-operator.yaml
-      then curl "$ROOK_URL/operator.yaml" >rook-operator.yaml
+      then echo "*** Installing Rook ***"
+           curl "$ROOK_URL/operator.yaml" >rook-operator.yaml
            kubectl apply -f rook-operator.yaml
       fi
       if ! test -e rook-cluster.yaml
@@ -218,7 +218,8 @@ write_files:
            -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
       fi
       if ! test -e /usr/sbin/traefik
-      then curl -L "$TRAEFIK_URL" -o /usr/sbin/traefik
+      then echo "*** Installing Traefik ***"
+           curl -L "$TRAEFIK_URL" -o /usr/sbin/traefik
            chmod +x /usr/sbin/traefik
       fi
       if ! test -e /etc/kubernetes/traefik.yml
@@ -308,7 +309,8 @@ write_files:
       systemctl enable traefik
       systemctl restart traefik
       if test -n "$DOMAIN" -a -n "$EMAIL"
-      then cat <<EOF >>/etc/traefik.toml
+      then echo "*** Installing Let's Encrypt Certificate ***"
+           cat <<EOF >>/etc/traefik.toml
       [acme]
         email = "$EMAIL"
         storage = "/etc/acme.json"
