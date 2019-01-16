@@ -112,6 +112,8 @@ write_files:
     permissions: 0755
     content: |
           #!/bin/bash
+          DOMAIN="${1:-}"
+          EMAIL="${2:-}"
           source /usr/local/etc/params.sh
           ENDPOINT="`cat /etc/kubernetes/kubeadm-join.sh | awk '/kubeadm/ { print "https://" $3 }'`"
           if test "$(whoami)" != root
@@ -150,16 +152,23 @@ write_files:
           envsubt </usr/local/etc/traefik.service  >/etc/systemd/system/traefik.service
           systemctl enable traefik
           systemctl restart traefik
-          if test -z "$2"
-          then echo "HTTPS with Let's encrypt not configured." 
-               echo "To configure it, get a domain name and run:"
-               echo "acme <your-domain> <your-email> [VAR=VAL]..."
-               echo "VAR=VAL are environment variables passed to traefik to configure DNS authentication."
-          else /usr/local/bin/acme "$@"
+          if test -n "$DOMAIN" -a -n "$EMAIL"
+          then echo "*** Installing Let's Encrypt Certificate ***"
+              cat <<EOF >>/etc/traefik.toml
+          [acme]
+          email = "$EMAIL"
+          storage = "/etc/acme.json"
+          acmeLogging = true
+          entryPoint = "https"
+          [acme.httpChallenge]
+          entryPoint = "http"
+          [[acme.domains]]
+          main = "$DOMAIN"
+          EOF
+          else echo "HTTPS with Let's encrypt not configured." 
+              echo "To configure it, get a domain name and run this script again with:"
+              echo "$0 <your-domain> <your-email>"
           fi
-  - path: /usr/local/bin/acme-config
-    permissions: 0755
-    content: |
   - path: /usr/local/etc/traefik.toml
     permissions: 0755
     content: |
@@ -184,17 +193,6 @@ write_files:
   - path: /usr/local/etc/traefik.service
     permissions: 0755
     content: |
-          [Unit]
-          Description=Traefik service
-          After=network.target
-          [Install]
-          WantedBy=multi-user.target
-          [Service]
-          Type=simple
-          Restart=always
-          RestartSec=1
-          User=root
-          ExecStart=/usr/sbin/traefik --configfile=/etc/traefik.toml
   - path: /usr/local/etc/traefik.yaml
     permissions: 0755
     content: |

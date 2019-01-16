@@ -1,0 +1,18 @@
+logLevel = "INFO"
+checknewversion = false
+defaultEntryPoints = ["http", "https"]
+[kubernetes]
+endpoint = "$ENDPOINT"
+token = "$TOKEN"
+certAuthFilePath = "/etc/kubernetes/pki/ca.crt"
+[entryPoints]
+[entryPoints.http]
+address = ":80"
+[entryPoints.https]
+address = ":443"
+[entryPoints.https.tls]
+[entryPoints.traefik]
+address = "127.0.0.1:8080"
+[api]
+entryPoint = "traefik"
+dashboard = true

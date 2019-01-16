@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sample
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: rook-claim
+  namespace: sample
+spec:
+  storageClassName: rook-ceph-block
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  namespace: sample
+  labels:
+    app: nginx
+spec:
+  initContainers:
+  - name: nginx-prepare
+    image: busybox
+    command: ["sh", "-c", "echo '<h1>Welcome!</h1>' >/usr/share/nginx/html/welcome/index.html"]
+    volumeMounts:
+    - name: pv
+      mountPath: "/usr/share/nginx/html/welcome"
+  containers:
+  - image: nginx
+    name: nginx
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: pv
+      mountPath: "/usr/share/nginx/html/welcome"
+  volumes:
+  - name: pv
+    persistentVolumeClaim:
+      claimName: "rook-claim"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+  namespace: sample
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  namespace: sample
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /welcome
+        backend:
+          serviceName: nginx-svc
+          servicePort: 80

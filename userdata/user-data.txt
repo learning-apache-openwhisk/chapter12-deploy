@@ -1,0 +1,66 @@
+#cloud-config
+## For the master, use this as-is, then connect
+## and execute: kube-init <your-public-ip>
+## For the workers, add the commands  
+## shown by kube-init when it finish running.
+# They are in this format (without the '#'):
+# runcmd:
+# - kubeadm 127.0.0.1:6444 --token XXX.XXX --discovery-token-ca-cert-hash sha256:XXX
+## If you do not have an user, you may set your root password
+## uncommenting the folloing section and setting your own password.
+#chpasswd:
+#  list:
+#   - root:Change-me!
+## If you edit past this line, you REALLY need to know what you do.
+packages: 
+    # if you change kubernetes version...
+    - kubeadm=1.11.6-00
+    - kubelet=1.11.6-00
+    - kubectl=1.11.6-00
+    # ...also use a SUPPORTED docker version for it
+    - docker-ce=17.03.2~ce-0~ubuntu-xenial
+    - apt-transport-https
+    - ntp
+    - jq
+growpart:
+    mode: auto
+    devices: ["/"]
+manage_etc_hosts: localhost
+locale: "en_US.UTF-8"
+apt_update: true
+apt_upgrade: true
+apt:
+  sources:
+      docker:
+          keyid: "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
+          source: "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+      kubernetes:
+          keyid: "54A647F9048D5688D7DA2ABE6A030B21BA07F4FB"
+          source: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+write_files:
+  - path: /etc/environment
+    content: |
+      LC_ALL=en_US.UTF-8
+      LANG=en_US.UTF-8
+      KUBECONFIG=/etc/kubernetes/admin.conf
+  - path: /etc/modules
+    content: |
+      ip_vs
+      ip_vs_rr
+      ip_vs_wrr
+      ip_vs_sh
+      nf_conntrack_ipv4
+  - path: /etc/sysctl.d/50-kube.conf
+    content: |
+      net.ipv4.ip_forward=1
+      net.bridge.bridge-nf-call-ip6tables=1
+      net.bridge.bridge-nf-call-iptables=1
+  - path: /etc/rc.local
+    permissions: '0755'
+    content: |
+      #!/bin/sh
+      cat /etc/modules | xargs -L1 modprobe
+      cat /etc/sysctl.d/50-kube.conf | xargs -L1 sysctl

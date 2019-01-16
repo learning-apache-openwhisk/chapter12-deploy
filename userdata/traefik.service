@@ -1,0 +1,11 @@
+[Unit]
+Description=Traefik service
+After=network.target
+[Install]
+WantedBy=multi-user.target
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/usr/sbin/traefik --configfile=/etc/traefik.toml
