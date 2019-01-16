@@ -80,7 +80,7 @@ write_files:
           if test "$(whoami)" != root
           then echo "Please, run me as 'sudo $0 $@'" ; exit 1
           fi
-          source /usr/local/etc/params.sh
+          source /usr/local/etc/param.sh
           echo "*** Waiting for Cloud-Init to finish:"
           cloud-init status --wait
           source /etc/rc.local
