@@ -27,7 +27,7 @@ sysctl -p
 
 # Building images
 
-Edit the user data addming a password (change  the password to your own)
+Edit the user data adding a password (change  the password to your own)
 
 ```
 chpasswd:
@@ -36,57 +36,57 @@ chpasswd:
 ```
 
 
-And a `boot.sh` script:
+Now prepare the master. Pick an "id" in the range 10 - 99. The `id` will be used as IP and MAC address and to name the Virtual Machine.
+
+You can now build the image specifying the `id` and the size of the disk image in GB.
 
 ```
+sh build.sh 10 20
 ```
 
-Now prepare the master:
+After building the vm you can boot it, specifying the `id` and the size of the memory in GB too.
 
 ```
-sh build.sh 10 20 user-data.txt
+sh boot.sh 10 4
 ```
 
-And boot it:
-
-```
-sh boot.sh 10 4096
-```
-
-
-Wait until 
+Wait until you see the message: 
 
 ```
 Reached target Cloud-init target.
 ```
 
-Press enter and login as root. Execute:
+Press enter and login as `root`. Execute:
 
 ```
 kube-provision <external-ip>
 ```
 
-At the end it will show the command to join the cluster.
-
-Do `cp user-data.txt user-data1.txt`. Edit the `user-data.txt` and the command below `runcmd:` (remember you need a prefix `-`).
-
-Now you can build moore images for the nodes, for example 3:
-
+At the end, it will show a snippet to add to the userdata to join the cluster in the format:
 
 ```
-sh build.sh 11 10 user-data1.txt
-sh build.sh 12 10 user-data1.txt
-sh build.sh 13 10 user-data1.txt
+runcmd:
+- kubeadm join <various informations>
 ```
 
-And boot all of them.
+
+You need only the command part starting with `kubeadm`
+
+Pick a few more ids in the range 10-99, for example 11,12,13
+
+Now build 3 images. The first parameter is the `id`, the second the size in `GB` the third one an init command to initialize the clusters.
 
 ```
-for I in 11 12 13 ; do sh boot.sh $I 2048 --noautoconsole ; done
+INIT="kubeadmin join <various-informations>"
+for i in 11 12 13 ; do sh build $i 20 "$INIT" ; done
 ```
 
-Come back to the master:
+And boot all of them (first paramter is the id, the second is the size of the memory in gb, the thirs is an additional command for the vm installer). Using `--noautoconsole` you start in backgroud.
 
-----
-$ virsh 
+```
+for i in 11 12 13 ; do sh boot.sh $i  --noautoconsole ; done
+```
+
+Come back to the master and proceed with the starndard procedure
+
 
