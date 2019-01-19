@@ -8,6 +8,8 @@
 # - kubeadm 127.0.0.1:6444 --token XXX.XXX --discovery-token-ca-cert-hash sha256:XXX
 ## If you do not have an user, you may set your root password
 ## uncommenting the folloing section and setting your own password.
+ssh_import_id:
+- gh:sciabarra
 #chpasswd:
 #  list:
 #   - root:Change-me!
