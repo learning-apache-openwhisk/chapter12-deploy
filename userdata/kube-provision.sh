@@ -25,7 +25,7 @@ then echo "*** Installing Traefik ***"
      chmod +x /usr/sbin/traefik
 fi
 if ! test -e /etc/traefik.toml
-then kubectl apply -f /etc/kubernetes/traefik.yml
+then kubectl apply -f /usr/local/etc/traefik.yaml
      export TOKEN=$(kubectl --namespace kube-system get secret -o json |\
 jq '.items[]|select(.metadata.name|contains("traefik-ingress-controller"))|.data.token' -r |\
 base64 -d)
