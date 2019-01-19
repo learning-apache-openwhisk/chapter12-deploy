@@ -2,7 +2,7 @@
 
 ../user-data.txt:
 	cat user-data.txt >$@
-	cat params.sh         | awk -v file=/usr/local/etc/param.sh -f inline.awk >>$@
+	cat param.sh          | awk -v file=/usr/local/etc/param.sh -f inline.awk >>$@
 	cat kube-init.sh      | awk -v file=/usr/local/bin/kube-init  -f inline.awk >>$@
 	cat kube-provision.sh | awk -v file=/usr/local/bin/kube-provision  -f inline.awk >>$@
 	cat acme-config.sh    | awk -v file=/usr/local/bin/acme-config -f inline.awk >>$@

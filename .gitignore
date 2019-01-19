@@ -1,3 +1,4 @@
 *.img
 *.iso
 libvirt/user-data*
+.DS_Store
