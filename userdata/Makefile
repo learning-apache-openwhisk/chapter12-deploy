@@ -1,3 +1,5 @@
+
+
 ../user-data.txt:
 	cat user-data.txt >$@
 	cat params.sh         | awk -v file=/usr/local/etc/param.sh -f inline.awk >>$@
@@ -8,3 +10,7 @@
 	cat traefik.service   | awk -v file=/usr/local/etc/traefik.service -f inline.awk >>$@
 	cat traefik.yaml      | awk -v file=/usr/local/etc/traefik.yaml -f inline.awk >>$@
 	cat sample.yaml       | awk -v file=/usr/local/etc/sample.yaml -f inline.awk >>$@
+
+force:
+	rm ../user-data.txt
+	$(MAKE) ../user-data.txt

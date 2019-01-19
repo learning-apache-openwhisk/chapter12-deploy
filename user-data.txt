@@ -7,12 +7,15 @@
 # runcmd:
 # - kubeadm 127.0.0.1:6444 --token XXX.XXX --discovery-token-ca-cert-hash sha256:XXX
 ## If you do not have an user, you may set your root password
-## uncommenting the folloing section and setting your own password.
-ssh_import_id:
-- gh:sciabarra
+## uncommenting the following section to import your ssh_key from GitHub
+## change the password 'Change-me!' with your password
 #chpasswd:
-#  list:
-#   - root:Change-me!
+# list:
+# - ubuntu:Change-me!
+## in alternative you can set directly your password:
+## replace 'your-github-user' with your github user (you have to add a ssh key there).
+#ssh_import_id:
+#- gh:your-github-user
 ## If you edit past this line, you REALLY need to know what you do.
 packages: 
     # if you change kubernetes version...
