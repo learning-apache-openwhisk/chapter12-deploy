@@ -1,19 +1,17 @@
 #cloud-config
-## For the master, use this as-is, then connect
+## For the master, use this as-is, then login into
 ## and execute: kube-init <your-public-ip>
-## For the workers, add the commands  
+## For the workers, add after the `#cloud-config` line the commands  
 ## shown by kube-init when it finish running.
-# They are in this format (without the '#'):
-# runcmd:
-# - kubeadm 127.0.0.1:6444 --token XXX.XXX --discovery-token-ca-cert-hash sha256:XXX
-## If you do not have an user, you may set your root password
-## uncommenting the following section to import your ssh_key from GitHub
+##
+## If you do not have an user, you may set your password
+## uncommenting the following section;
 ## change the password 'Change-me!' with your password
 #chpasswd:
 # list:
 # - ubuntu:Change-me!
-## in alternative you can set directly your password:
-## replace 'your-github-user' with your github user (you have to add a ssh key there).
+## if you have a ssh-key in a public server (for example, GitHub) you can also att it;
+## replace 'your-github-user' with your GitHub user (you need to have an SSH key there).
 #ssh_import_id:
 #- gh:your-github-user
 ## If you edit past this line, you REALLY need to know what you do.
@@ -143,7 +141,7 @@ write_files:
                chmod +x /usr/sbin/traefik
           fi
           if ! test -e /etc/traefik.toml
-          then kubectl apply -f /etc/kubernetes/traefik.yml
+          then kubectl apply -f /usr/local/etc/traefik.yaml
                export TOKEN=$(kubectl --namespace kube-system get secret -o json |\
           jq '.items[]|select(.metadata.name|contains("traefik-ingress-controller"))|.data.token' -r |\
           base64 -d)
@@ -163,10 +161,13 @@ write_files:
     permissions: 0755
     content: |
           #!/bin/sh
+          if test "$(whoami)" != root
+          then echo "Please, run me as 'sudo $0 $@'" ; exit 1
+          fi
           DOMAIN=${1:?DOMAIN}
           EMAIL=${2:?EMAIL}
           shift 2
-          if grep '[acme]' /etc/traefik.toml
+          if fgrep '[acme]' /etc/traefik.toml
           then echo "Acme already installed"; exit
           fi
           echo "*** Installing Let's Encrypt Certificate ***"
@@ -181,6 +182,8 @@ write_files:
           [[acme.domains]]
           main = "$DOMAIN"
           EOF
+          systemctl restart traefik
+          
   - path: /usr/local/etc/traefik.toml
     permissions: 0755
     content: |
