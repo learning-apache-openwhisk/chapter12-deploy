@@ -43,8 +43,6 @@ apt:
 package_update: true
 package_upgrade: true
 package_reboot_if_required: true
-runcmd:
-- bash /etc/rc.local
 write_files:
   - path: /etc/environment
     content: |
@@ -80,6 +78,7 @@ write_files:
           fi
           echo "*** Waiting for Cloud-Init to finish:"
           cloud-init status --wait
+          source /etc/rc.local
           echo "*** Kubernetes Pulling Images:"
           kubeadm config images pull
           echo "*** Kubernetes Initializing:"

@@ -6,6 +6,7 @@ then echo "Please, run me as 'sudo $0 $@'" ; exit 1
 fi
 echo "*** Waiting for Cloud-Init to finish:"
 cloud-init status --wait
+source /etc/rc.local
 echo "*** Kubernetes Pulling Images:"
 kubeadm config images pull
 echo "*** Kubernetes Initializing:"
