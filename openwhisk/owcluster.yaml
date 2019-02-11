@@ -1,0 +1,23 @@
+whisk:
+  ingress: 
+     type: Standard
+     domain: <external-address>
+     apiHostName: <external-address>
+     apiHostPort: 443
+  auth:
+    system: "<system-credentials>"
+    guest: "<guest-credentials>"
+invoker:
+  containerFactory:
+    nameservers: "<dns-ip-address>"
+db:
+  auth:
+    username: "<database-username>"
+    password: "<database-password>"
+providers:
+  alarm:
+    enabled: true
+  cloudant:
+    enabled: true
+  kafka:
+    enabled: true 
