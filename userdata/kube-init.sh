@@ -6,8 +6,6 @@ then echo "Please, run me as 'sudo $0 $@'" ; exit 1
 fi
 echo "*** Waiting for Cloud-Init to finish:"
 cloud-init status --wait
-export K8S_VERSION="$(kubectl version | base64 | tr -d '\n')"
-export WEAVE_URL="https://cloud.weave.works/k8s/net?k8s-version=$K8S_VERSION"
 echo "*** Kubernetes Pulling Images:"
 kubeadm config images pull
 echo "*** Kubernetes Initializing:"
@@ -16,6 +14,8 @@ kubeadm init \
 --apiserver-cert-extra-sans "$PUB_IP" \
 --apiserver-bind-port "$PUB_PORT" | tee /tmp/kubeadm.log
 echo "*** Installing Weave:"
+export K8S_VERSION="$(kubectl version | base64 | tr -d '\n')"
+export WEAVE_URL="https://cloud.weave.works/k8s/net?k8s-version=$K8S_VERSION"
 kubectl apply -f "$WEAVE_URL"
 echo "*** Waiting for Kubernetes to get ready:"
 STATE="NotReady"
