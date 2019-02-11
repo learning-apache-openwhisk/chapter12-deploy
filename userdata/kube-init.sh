@@ -4,10 +4,10 @@ PUB_PORT=${2:-6443}
 if test "$(whoami)" != root
 then echo "Please, run me as 'sudo $0 $@'" ; exit 1
 fi
-source /usr/local/etc/param.sh
 echo "*** Waiting for Cloud-Init to finish:"
 cloud-init status --wait
-source /etc/rc.local
+export K8S_VERSION="$(kubectl version | base64 | tr -d '\n')"
+export WEAVE_URL="https://cloud.weave.works/k8s/net?k8s-version=$K8S_VERSION"
 echo "*** Kubernetes Pulling Images:"
 kubeadm config images pull
 echo "*** Kubernetes Initializing:"

@@ -1,5 +1,6 @@
 #!/bin/bash
-source /usr/local/etc/param.sh
+export TRAEFIK_URL="https://github.com/containous/traefik/releases/download/v1.7.6/traefik_linux-amd64"
+export ROOK_URL="https://raw.githubusercontent.com/rook/rook/release-0.9/cluster/examples/kubernetes/ceph"
 if test "$(whoami)" != root
 then echo "Please, run me as 'sudo $0 $@'" ; exit 1
 fi

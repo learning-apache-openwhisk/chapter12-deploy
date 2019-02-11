@@ -43,6 +43,8 @@ apt:
 package_update: true
 package_upgrade: true
 package_reboot_if_required: true
+runcmd:
+- bash /etc/rc.local
 write_files:
   - path: /etc/environment
     content: |
@@ -67,13 +69,6 @@ write_files:
       #!/bin/sh
       cat /etc/modules | xargs -L1 modprobe
       cat /etc/sysctl.d/50-kube.conf | xargs -L1 sysctl
-  - path: /usr/local/etc/param.sh
-    permissions: 0755
-    content: |
-          export K8S_VERSION="$(kubectl version | base64 | tr -d '\n')"
-          export WEAVE_URL="https://cloud.weave.works/k8s/net?k8s-version=$K8S_VERSION"
-          export TRAEFIK_URL="https://github.com/containous/traefik/releases/download/v1.7.6/traefik_linux-amd64"
-          export ROOK_URL="https://raw.githubusercontent.com/rook/rook/release-0.9/cluster/examples/kubernetes/ceph"
   - path: /usr/local/bin/kube-init
     permissions: 0755
     content: |
@@ -83,10 +78,10 @@ write_files:
           if test "$(whoami)" != root
           then echo "Please, run me as 'sudo $0 $@'" ; exit 1
           fi
-          source /usr/local/etc/param.sh
           echo "*** Waiting for Cloud-Init to finish:"
           cloud-init status --wait
-          source /etc/rc.local
+          export K8S_VERSION="$(kubectl version | base64 | tr -d '\n')"
+          export WEAVE_URL="https://cloud.weave.works/k8s/net?k8s-version=$K8S_VERSION"
           echo "*** Kubernetes Pulling Images:"
           kubeadm config images pull
           echo "*** Kubernetes Initializing:"
@@ -115,7 +110,8 @@ write_files:
     permissions: 0755
     content: |
           #!/bin/bash
-          source /usr/local/etc/param.sh
+          export TRAEFIK_URL="https://github.com/containous/traefik/releases/download/v1.7.6/traefik_linux-amd64"
+          export ROOK_URL="https://raw.githubusercontent.com/rook/rook/release-0.9/cluster/examples/kubernetes/ceph"
           if test "$(whoami)" != root
           then echo "Please, run me as 'sudo $0 $@'" ; exit 1
           fi
