@@ -17,11 +17,11 @@
 ## If you edit past this line, you REALLY need to know what you do.
 packages: 
     # if you change kubernetes version...
-    - kubeadm=1.11.6-00
-    - kubelet=1.11.6-00
-    - kubectl=1.11.6-00
+    - kubeadm=1.14.0-00
+    - kubelet=1.14.0-00
+    - kubectl=1.14.0-00
     # ...also use a SUPPORTED docker version for it
-    - docker-ce=17.03.2~ce-0~ubuntu-xenial
+    - docker-ce=18.06.2~ce~3-0~ubuntu
     - apt-transport-https
     - ntp
     - jq
@@ -103,7 +103,8 @@ write_files:
           echo -n "." ; sleep 1
           done
           echo ""
-          grep "kubeadm join" /tmp/kubeadm.log >/etc/kubernetes/kubeadm-join.sh
+          if grep "kubeadm join" /tmp/kubeadm.log >/dev/null
+          then kubeadm token create --ttl 0 --print-join-command >/etc/kubernetes/kubeadm-join.sh
           awk '{ $3 = "'$PUB_IP:$PUB_PORT'"; print }' </etc/kubernetes/kubeadm-join.sh >/etc/kubernetes/kubeadm-join-ext.sh 
           echo "*** If you have a private network, add to Cloud-Init for Workers:"
           echo "runcmd:"
@@ -111,6 +112,8 @@ write_files:
           echo "*** If you only have a public network, add to Cloud-Init for Workers:"
           echo "runcmd:"
           echo "- $(cat /etc/kubernetes/kubeadm-join-ext.sh)"
+          else echo "*** Something went wrong - check connectivity"
+          fi
   - path: /usr/local/bin/kube-provision
     permissions: 0755
     content: |

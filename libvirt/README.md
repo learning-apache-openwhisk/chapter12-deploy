@@ -107,7 +107,7 @@ kube-provision <external-dns-name> <your-email-address>
 Deploy a sample deployment
 
 ```
-kubectl apply -f /usr/local/etc/sample.yml
+kubectl apply -f /usr/local/etc/sample.yaml
 ```
 
 Wait until the pod `nginx-pod` is ready (it can take a while)
